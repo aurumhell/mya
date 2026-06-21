@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ИБЧ — Истина или Бред Человечества</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #6366F1;
+      --secondary: #8B5CF6;
+      --accent: #06B6D4;
+      --success: #22C55E;
+      --error: #EF4444;
+      --bg: #f8fafc;
+      --bg-glass: rgba(255,255,255,0.15);
+      --border-glass: rgba(255,255,255,0.25);
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --card-bg: rgba(255,255,255,0.25);
+      --shadow: 0 4px 30px rgba(0,0,0,0.1);
+      --neon-glow: 0 0 15px var(--primary);
+      --radius: 1.5rem;
+      --transition: 0.3s ease;
+    }
+    body.dark {
+      --bg: #0f172a;
+      --bg-glass: rgba(0,0,0,0.3);
+      --border-glass: rgba(255,255,255,0.1);
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --card-bg: rgba(0,0,0,0.3);
+      --shadow: 0 4px 30px rgba(0,0,0,0.5);
+      --neon-glow: 0 0 15px #818cf8;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+      padding-bottom: 2rem;
+    }
+    /* glass card */
+    .glass {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .glass:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
+    .neon-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 3rem;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: 0 0 10px rgba(99,102,241,0.4);
+      font-size: 1rem;
+    }
+    .neon-btn:hover {
+      box-shadow: 0 0 25px rgba(139,92,246,0.7);
+      transform: scale(1.03);
+    }
+    .neon-btn:active { transform: scale(0.97); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 0.8rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-size: 1.8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .theme-toggle {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer; line-height: 1;
+    }
+    nav { display: flex; gap: 1.5rem; align-items: center; }
+    nav a {
+      color: var(--text-secondary); text-decoration: none; font-weight: 500;
+      padding: 0.3rem 0.6rem; border-radius: 0.5rem; transition: background 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--text); background: rgba(99,102,241,0.1); }
+    .section { display: none; padding-top: 1.5rem; }
+    .section.active { display: block; }
+    /* Fact card */
+    .fact-card { position: relative; margin-bottom: 2rem; }
+    .fact-category {
+      display: inline-block; padding: 0.2rem 0.8rem;
+      background: rgba(99,102,241,0.15); border-radius: 1rem;
+      font-size: 0.8rem; color: var(--primary); font-weight: 600;
+    }
+    .fact-text { font-size: 1.25rem; margin: 1rem 0; line-height: 1.6; }
+    .fact-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .fact-actions button {
+      background: transparent; border: 1px solid var(--border-glass);
+      padding: 0.4rem 1rem; border-radius: 2rem; cursor: pointer;
+      transition: all 0.2s; font-size: 0.9rem; color: var(--text-secondary);
+    }
+    .fact-actions button:hover { background: rgba(99,102,241,0.1); border-color: var(--primary); }
+    .fact-actions .liked { color: #ef4444; }
+    .fact-actions .favored { color: #eab308; }
+    .xp-badge {
+      position: absolute; top: 0.5rem; right: 1rem;
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      color: white; padding: 0.2rem 0.8rem; border-radius: 1rem;
+      font-size: 0.8rem; font-weight: bold;
+    }
+    /* categories grid */
+    .categories-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;
+    }
+    .category-item {
+      background: var(--card-bg); backdrop-filter: blur(8px);
+      border: 1px solid var(--border-glass); border-radius: 1.5rem;
+      padding: 1.5rem 0.5rem; text-align: center; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .category-item:hover { transform: translateY(-4px); box-shadow: var(--neon-glow); }
+    .category-emoji { font-size: 2.5rem; }
+    /* quiz */
+    .quiz-options { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+    .quiz-result { text-align: center; margin-top: 1rem; }
+    .quiz-explanation { margin: 1rem 0; color: var(--text-secondary); }
+    /* wheel */
+    .wheel-container { position: relative; width: 280px; height: 280px; margin: 2rem auto; }
+    canvas { width: 100%; height: 100%; border-radius: 50%; box-shadow: var(--neon-glow); }
+    .wheel-pointer {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      font-size: 2rem; filter: drop-shadow(0 0 6px var(--primary));
+    }
+    .spin-btn { display: block; margin: 1.5rem auto; }
+    /* leaderboard */
+    .leaderboard-item {
+      display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem;
+      background: var(--card-bg); backdrop-filter: blur(8px);
+      border-radius: 1rem; margin-bottom: 0.5rem;
+    }
+    .leaderboard-rank { font-weight: bold; width: 2rem; }
+    .leaderboard-avatar {
+      width: 40px; height: 40px; border-radius: 50%; background: var(--primary);
+      display: flex; align-items: center; justify-content: center; color: white;
+    }
+    .leaderboard-xp { margin-left: auto; font-weight: 600; color: var(--primary); }
+    /* profile */
+    .profile-header { text-align: center; }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); margin: 0 auto; }
+    .stats { display: flex; justify-content: center; gap: 2rem; margin: 1.5rem 0; }
+    .stat { text-align: center; }
+    .achievements { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+    .badge {
+      background: var(--card-bg); border: 1px solid var(--border-glass);
+      border-radius: 0.8rem; padding: 0.5rem 1rem; font-size: 0.8rem;
+    }
+    .badge.earned { background: rgba(34,197,94,0.15); border-color: var(--success); }
+    /* daily tasks */
+    .task { display: flex; justify-content: space-between; padding: 0.5rem 0; }
+    .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-top: 0.3rem; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ИБЧ</div>
+  <nav>
+    <a href="#" data-section="home" class="active">Главная</a>
+    <a href="#" data-section="quiz">Викторина</a>
+    <a href="#" data-section="wheel">Колесо</a>
+    <a href="#" data-section="leaderboard">Лидеры</a>
+    <a href="#" data-section="profile">Профиль</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle">🌓</button>
+</header>
+
+<main class="container">
+  <!-- Главная -->
+  <section id="home" class="section active">
+    <h1 style="text-align:center; margin:1rem 0; font-size:2.5rem;">
+      <span style="background:linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+        Каждый факт может оказаться ложью
+      </span>
+    </h1>
+    <div id="randomFactCard" class="glass fact-card"></div>
+    <button id="newRandomFact" class="neon-btn" style="display:block; margin: 0 auto;">🎲 Случайный факт</button>
+
+    <h2 style="margin: 2rem 0 1rem;">Категории</h2>
+    <div class="categories-grid" id="categoriesGrid"></div>
+  </section>
+
+  <!-- Викторина -->
+  <section id="quiz" class="section">
+    <h2 style="text-align:center;">Правда или Ложь?</h2>
+    <div id="quizContainer" class="glass" style="max-width:500px; margin: 2rem auto;"></div>
+    <div id="quizScore" style="text-align:center; margin-top:1rem;"></div>
+  </section>
+
+  <!-- Колесо -->
+  <section id="wheel" class="section">
+    <h2 style="text-align:center;">Колесо фактов</h2>
+    <div class="wheel-container">
+      <div class="wheel-pointer">▼</div>
+      <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    </div>
+    <button id="spinWheel" class="neon-btn spin-btn">🎡 Крутить</button>
+    <div id="wheelResult" style="text-align:center; margin-top:1rem;"></div>
+  </section>
+
+  <!-- Таблица лидеров -->
+  <section id="leaderboard" class="section">
+    <h2 style="text-align:center;">🏆 Топ игроков</h2>
+    <div id="leaderboardList" style="max-width:500px; margin: 0 auto;"></div>
+  </section>
+
+  <!-- Профиль -->
+  <section id="profile" class="section">
+    <div id="profileContainer" class="glass" style="max-width:500px; margin: 0 auto;"></div>
+  </section>
+</main>
+
+<script>
+  // ---------- ДАННЫЕ (мок) ----------
+  const factsDB = [
+    { id:1, text:"Бананы являются ягодами.", truth:true, category:"Наука", explanation:"Ботанически банан — ягода, а клубника — нет." },
+    { id:2, text:"Великую Китайскую стену видно из космоса.", truth:false, category:"Космос", explanation:"Она слишком узкая, невооружённым глазом не видна." },
+    { id:3, text:"Крокодилы умеют плакать.", truth:true, category:"Животные", explanation:"У них есть слёзные железы для увлажнения глаз." },
+    { id:4, text:"Молния никогда не бьёт в одно место дважды.", truth:false, category:"Наука", explanation:"Молния часто бьёт в высокие объекты многократно." },
+    { id:5, text:"Венера вращается в обратную сторону.", truth:true, category:"Космос", explanation:"Это ретроградное вращение, уникальное среди планет." },
+    { id:6, text:"Человек использует только 10% мозга.", truth:false, category:"Наука", explanation:"Мозг активен полностью, но не все области одновременно." },
+    { id:7, text:"Пингвины живут только в Антарктиде.", truth:false, category:"Животные", explanation:"Галапагосские пингвины живут у экватора." },
+    { id:8, text:"Арахис — это орех.", truth:false, category:"Наука", explanation:"Арахис относится к бобовым." },
+  ];
+
+  const categories = ["Наука","Космос","Животные","История","Технологии","География","Мемы","Странное"];
+  const categoryEmojis = { Наука:"🔬", Космос:"🚀", Животные:"🐾", История:"📜", Технологии:"💻", География:"🌍", Мемы:"😂", Странное:"👽" };
+
+  const achievementsDef = [
+    { code:"FIRST_FACT", name:"Первый факт", desc:"Прочитайте первый факт", xp:10 },
+    { code:"FACTS_5", name:"5 фактов", desc:"Прочитайте 5 фактов", xp:25 },
+    { code:"QUIZ_5", name:"5 правильных", desc:"Ответьте правильно на 5 вопросов", xp:50 },
+    { code:"WHEEL_SPIN", name:"Крутящий", desc:"Испытайте колесо", xp:20 },
+  ];
+
+  const mockLeaderboard = [
+    { name:"КосмоКот", xp:1250, level:12 },
+    { name:"ФактоФанатка", xp:980, level:10 },
+    { name:"Правдоруб", xp:720, level:9 },
+    { name:"Вы", xp:0, level:1, isUser:true },
+  ];
+
+  // ---------- СОСТОЯНИЕ ПОЛЬЗОВАТЕЛЯ (локальное) ----------
+  let userState = JSON.parse(localStorage.getItem('ibch_user')) || {
+    name: "Гость",
+    xp: 0,
+    level: 1,
+    factsRead: 0,
+    correctAnswers: 0,
+    totalAnswers: 0,
+    likes: [],
+    favorites: [],
+    achievements: [],
+    daily: { factsReadToday:0, questionsAnsweredToday:0, lastDate: new Date().toDateString() }
+  };
+
+  function saveState() {
+    localStorage.setItem('ibch_user', JSON.stringify(userState));
+  }
+
+  function addXP(amount, reason) {
+    userState.xp += amount;
+    const newLevel = Math.floor(Math.sqrt(userState.xp / 100)) + 1;
+    if (newLevel > userState.level) userState.level = newLevel;
+    checkAchievements();
+    saveState();
+    updateProfileUI();
+  }
+
+  function checkAchievements() {
+    const earned = userState.achievements.map(a => a.code);
+    if (!earned.includes('FIRST_FACT') && userState.factsRead >= 1) {
+      userState.achievements.push(achievementsDef.find(a=>a.code==='FIRST_FACT'));
+      addXP(10, 'achievement');
+    }
+    if (!earned.includes('FACTS_5') && userState.factsRead >= 5) {
+      userState.achievements.push(achievementsDef.find(a=>a.code==='FACTS_5'));
+      addXP(25, 'achievement');
+    }
+    if (!earned.includes('QUIZ_5') && userState.correctAnswers >= 5) {
+      userState.achievements.push(achievementsDef.find(a=>a.code==='QUIZ_5'));
+      addXP(50, 'achievement');
+    }
+  }
+
+  // Сброс ежедневных заданий если новый день
+  const today = new Date().toDateString();
+  if (userState.daily.lastDate !== today) {
+    userState.daily = { factsReadToday:0, questionsAnsweredToday:0, lastDate: today };
+    saveState();
+  }
+
+  // ---------- ТЕМА ----------
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(dark) {
+    document.body.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.contains('dark');
+    applyTheme(!isDark);
+  });
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') applyTheme(true);
+  else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme(true);
+
+  // ---------- НАВИГАЦИЯ ----------
+  const navLinks = document.querySelectorAll('nav a');
+  const sections = document.querySelectorAll('.section');
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = link.dataset.section;
+      sections.forEach(s => s.classList.remove('active'));
+      navLinks.forEach(l => l.classList.remove('active'));
+      document.getElementById(target).classList.add('active');
+      link.classList.add('active');
+      if (target === 'leaderboard') renderLeaderboard();
+      if (target === 'profile') renderProfile();
+    });
+  });
+
+  // ---------- ГЛАВНАЯ: факты ----------
+  function getRandomFact(category = null) {
+    let pool = factsDB;
+    if (category) pool = factsDB.filter(f => f.category === category);
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool[idx];
+  }
+
+  function renderFactCard(fact) {
+    const container = document.getElementById('randomFactCard');
+    if (!fact) return;
+    const liked = userState.likes.includes(fact.id);
+    const favored = userState.favorites.includes(fact.id);
+    container.innerHTML = `
+      <span class="xp-badge">+5 XP</span>
+      <span class="fact-category">${categoryEmojis[fact.category] || '📌'} ${fact.category}</span>
+      <p class="fact-text">${fact.text}</p>
+      <div class="fact-actions">
+        <button class="${liked?'liked':''}" onclick="toggleLike(${fact.id})">❤️ ${liked?'Убрать':'Нравится'}</button>
+        <button class="${favored?'favored':''}" onclick="toggleFav(${fact.id})">⭐ ${favored?'В избранном':'В избранное'}</button>
+        <button onclick="shareFact('${fact.text.replace(/'/g, "\\'")}')">🔗 Поделиться</button>
+      </div>
+    `;
+    if (!userState.factsRead) userState.factsRead = 0;
+    userState.factsRead++;
+    userState.daily.factsReadToday++;
+    addXP(5, 'fact_read');
+  }
+
+  window.toggleLike = (id) => {
+    const idx = userState.likes.indexOf(id);
+    if (idx > -1) userState.likes.splice(idx,1);
+    else userState.likes.push(id);
+    saveState();
+    renderFactCard(getRandomFact()); // перерендер текущего
+  };
+  window.toggleFav = (id) => {
+    const idx = userState.favorites.indexOf(id);
+    if (idx > -1) userState.favorites.splice(idx,1);
+    else userState.favorites.push(id);
+    saveState();
+    renderFactCard(getRandomFact());
+  };
+  window.shareFact = (text) => {
+    if (navigator.share) navigator.share({title:'Факт дня', text});
+    else alert('Поделись: ' + text);
+  };
+
+  document.getElementById('newRandomFact').addEventListener('click', () => {
+    renderFactCard(getRandomFact());
+  });
+  // Первоначальная загрузка
+  renderFactCard(getRandomFact());
+
+  // Категории
+  const catGrid = document.getElementById('categoriesGrid');
+  catGrid.innerHTML = categories.map(cat =>
+    `<div class="category-item" onclick="renderFactCard(getRandomFact('${cat}'))">
+      <div class="category-emoji">${categoryEmojis[cat]||'📌'}</div>
+      <div>${cat}</div>
+    </div>`
+  ).join('');
+
+  // ---------- ВИКТОРИНА ----------
+  let currentQuestion = null;
+  let quizScore = 0;
+  let questionsAsked = 0;
+
+  function loadNewQuestion() {
+    const fact = factsDB[Math.floor(Math.random() * factsDB.length)];
+    currentQuestion = fact;
+    const quizDiv = document.getElementById('quizContainer');
+    quizDiv.innerHTML = `
+      <p style="font-size:1.2rem;">${fact.text}</p>
+      <div class="quiz-options">
+        <button class="neon-btn" onclick="answerQuiz(true)">✅ Правда</button>
+        <button class="neon-btn" onclick="answerQuiz(false)">❌ Ложь</button>
+      </div>
+    `;
+    document.getElementById('quizScore').innerText = `Правильных: ${quizScore} | Всего: ${questionsAsked}`;
+  }
+
+  window.answerQuiz = (userAnswer) => {
+    const correct = currentQuestion.truth === userAnswer;
+    questionsAsked++;
+    if (correct) {
+      quizScore++;
+      userState.correctAnswers++;
+      addXP(20, 'quiz_correct');
+    } else {
+      addXP(2, 'quiz_wrong');
+    }
+    userState.daily.questionsAnsweredToday++;
+    saveState();
+
+    const quizDiv = document.getElementById('quizContainer');
+    quizDiv.innerHTML = `
+      <p style="font-size:1.2rem;">${currentQuestion.text}</p>
+      <div class="quiz-result">
+        <span style="font-size:2rem;">${correct ? '🎉 Верно!' : '❌ Неверно'}</span>
+        <p class="quiz-explanation">${currentQuestion.explanation || ''}</p>
+        <button class="neon-btn" onclick="loadNewQuestion()">Следующий вопрос</button>
+      </div>
+    `;
+    document.getElementById('quizScore').innerText = `Правильных: ${quizScore} | Всего: ${questionsAsked}`;
+  };
+
+  document.querySelector('[data-section="quiz"]').addEventListener('click', loadNewQuestion);
+  if (document.getElementById('quiz').classList.contains('active')) loadNewQuestion();
+
+  // ---------- КОЛЕСО ----------
+  const wheelCanvas = document.getElementById('wheelCanvas');
+  const ctx = wheelCanvas.getContext('2d');
+  const wheelPrizes = [
+    { label: 'Факт', color: '#6366F1' },
+    { label: '+10 XP', color: '#8B5CF6' },
+    { label: 'Редкий факт', color: '#06B6D4' },
+    { label: 'Достижение', color: '#22C55E' },
+    { label: 'Бонус XP', color: '#EF4444' },
+    { label: 'Факт', color: '#6366F1' },
+  ];
+  let wheelAngle = 0;
+  let spinning = false;
+
+  function drawWheel(rotation = 0) {
+    const centerX = 200, centerY = 200, radius = 180;
+    ctx.clearRect(0,0,400,400);
+    const sliceAngle = (2 * Math.PI) / wheelPrizes.length;
+    wheelPrizes.forEach((prize, i) => {
+      const startAngle = i * sliceAngle + rotation;
+      const endAngle = startAngle + sliceAngle;
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      ctx.fillStyle = prize.color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(startAngle + sliceAngle / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText(prize.label, radius - 20, 5);
+      ctx.restore();
+    });
+  }
+
+  function spinWheel() {
+    if (spinning) return;
+    spinning = true;
+    const spinDuration = 3000;
+    const totalRotation = Math.random() * 3600 + 1800; // несколько оборотов
+    const startAngle = wheelAngle;
+    const startTime = performance.now();
+
+    function animate(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / spinDuration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentRotation = startAngle + totalRotation * easeOut;
+      wheelAngle = currentRotation % (2 * Math.PI);
+      drawWheel(wheelAngle);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        spinning = false;
+        // Определить приз
+        const sliceAngle = (2 * Math.PI) / wheelPrizes.length;
+        const normalized = (wheelAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        const index = Math.floor(normalized / sliceAngle) % wheelPrizes.length;
+        const prize = wheelPrizes[index];
+        document.getElementById('wheelResult').innerHTML = `Выпало: <strong>${prize.label}</strong>`;
+        if (prize.label === '+10 XP') addXP(10, 'wheel');
+        else if (prize.label === 'Бонус XP') addXP(25, 'wheel');
+        else if (prize.label === 'Достижение') {
+          if (!userState.achievements.find(a=>a.code==='WHEEL_SPIN')) {
+            userState.achievements.push(achievementsDef.find(a=>a.code==='WHEEL_SPIN'));
+            addXP(20, 'achievement');
+          }
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  document.getElementById('spinWheel').addEventListener('click', spinWheel);
+  drawWheel(0);
+
+  // ---------- ЛИДЕРБОРД ----------
+  function renderLeaderboard() {
+    const list = document.getElementById('leaderboardList');
+    mockLeaderboard[3].xp = userState.xp;
+    mockLeaderboard[3].level = userState.level;
+    const sorted = [...mockLeaderboard].sort((a,b) => b.xp - a.xp);
+    list.innerHTML = sorted.map((u,i) => `
+      <div class="leaderboard-item">
+        <span class="leaderboard-rank">${i+1}</span>
+        <div class="leaderboard-avatar">${u.name[0]}</div>
+        <div>${u.name} (ур.${u.level})</div>
+        <span class="leaderboard-xp">${u.xp} XP</span>
+      </div>
+    `).join('');
+  }
+
+  // ---------- ПРОФИЛЬ ----------
+  function updateProfileUI() {
+    const container = document.getElementById('profileContainer');
+    if (!container) return;
+    const achievedCodes = userState.achievements.map(a => a.code);
+    container.innerHTML = `
+      <div class="profile-header">
+        <div class="profile-avatar"></div>
+        <h2>${userState.name}</h2>
+        <p>Уровень ${userState.level} · ${userState.xp} XP</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong>${userState.factsRead}</strong><br>фактов</div>
+        <div class="stat"><strong>${userState.correctAnswers}</strong><br>верных</div>
+        <div class="stat"><strong>${userState.daily.factsReadToday}</strong><br>сегодня</div>
+      </div>
+      <h3>Достижения</h3>
+      <div class="achievements">
+        ${achievementsDef.map(a => `
+          <div class="badge ${achievedCodes.includes(a.code)?'earned':''}">${achievedCodes.includes(a.code)?'🏅':''} ${a.name}</div>
+        `).join('')}
+      </div>
+      <h3 style="margin-top:1rem;">Ежедневные задания</h3>
+      <div class="task">
+        <span>Прочитать 5 фактов</span>
+        <span>${Math.min(userState.daily.factsReadToday,5)}/5</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(userState.daily.factsReadToday/5*100,100)}%"></div></div>
+      <div class="task" style="margin-top:0.5rem;">
+        <span>Ответить на 10 вопросов</span>
+        <span>${Math.min(userState.daily.questionsAnsweredToday,10)}/10</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(userState.daily.questionsAnsweredToday/10*100,100)}%"></div></div>
+    `;
+  }
+
+  function renderProfile() {
+    updateProfileUI();
+  }
+
+  // Инициализация профиля при загрузке страницы
+  updateProfileUI();
+</script>
+</body>
+</html>
